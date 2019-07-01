@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title><%= title %></title>
+  <% if (css) { %><% for(let href of css){ %><link rel="stylesheet" href="<%= CDN + href %>"><% } %><% } %>
+</head>
+
+<body>
+  <%- body %>
+  <% if (js) { %><% for(let src of js){ %><script src="<%= CDN + src %>"></script><% } %><% } %>
+</body>
+
+</html>
