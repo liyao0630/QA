@@ -1,43 +1,49 @@
-const { assertExists, readFile, readFileSync } = require('../utils')
+const fs = require('fs')
 const ejs = require('ejs')
-
-module.exports = exports = class Template{
-  getAssets(filePath) {
-    let template = assertExists(filePath) && readFileSync(filePath)
-    if (template) {
-      return template
-    }
+const BusinessException = require('../utils/businessException')
+module.exports = exports = class Template {
+  readFile(path) {
+    return new Promise((resolve, reject) => {
+      fs.readFile(path, (err, data) => {
+        if (err) {
+          reject(err)
+        } else {
+          resolve(data)
+        }
+      })
+    })
+  }
+  static(filePath) {
+    return fs.existsSync(filePath) && fs.readFileSync(filePath)
   }
 
-  async getLayout(filePath, data) {
+  show(filePath, data, layoutTemplate) {
+    if (fs.existsSync(filePath)) {
+      let body = fs.readFileSync(filePath).toString()
+      body = this.render(body, data)
+      if (layoutTemplate) {
+        data = Object.assign({ title: '', seo: '', css: '', js: '', CDN: '' }, data, { body })
+        return this.render(layoutTemplate, data)
+      } else {
+        return body
+      }
+    } else {
+      throw new BusinessException(`${filePath}不存在`, -1, {})
+    }
+
+  }
+
+  /* async show(filePath, data) {
     let template = await Promise.all([readFile(filePath), readFile(path.resolve(this.options.templatePath + '/layout.html'))])
 
     let body = this.render(template[0].toString(), data)
 
     data = Object.assign({ title: this.options.title + this.options.defaultTitle, seo: '', css: '', js: '', CDN: this.options.CDN }, data, {body})
     
-    // let layout = readFile(this.options.templatePath + '../layout/index.html')
     return this.render(template[1].toString(), data)
-    /* 
-    let body = readFile(filePath)
-    body = this.render(body.toString(), data)
+  } */
 
-    data = Object.assign({ title: this.options.title + this.options.defaultTitle, seo: '', css: '', js: '', CDN: this.options.CDN }, data, {body})
-    
-    let layout = readFile(this.options.templatePath + '../layout/index.html')
-    return this.render(layout.toString(), data)
-    */
-
-    /* 
-    let body = readFile(path.resolve(__dirname, filePath))
-    body = this.render(body.toString(), data)
-    data = Object.assign({ title: this.options.title + this.defaultOptions, seo: '', css: '', js: '' }, {body:path.resolve(__dirname, filePath)})
-    let layout = readFile(path.resolve(__dirname, this.options.templatePath + '../layout/index.html')) 
-    return this.render(layout.toString(), data)
-    */
-  }
-
-  ender(template, data, options) {
+  render(template, data, options) {
     return ejs.render(template, data, options)
   }
 }

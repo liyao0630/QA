@@ -1,7 +1,7 @@
 const fs = require('fs')
 
 module.exports = exports = {
-  assertExists(path) {
+  fileExists(path) {
     return fs.existsSync(path)
   },
   readFileSync(path) {
