@@ -1,7 +1,6 @@
 const http = require('http')
 const path = require('path')
 const ejs = require('ejs')
-const BusinessException = require('../utils/businessException')
 const { assertExists, readFile, readFileSync } = require('../utils')
 const MimeType = require('../utils/mimeType')
 const mimeType = new MimeType()
@@ -30,23 +29,23 @@ class Intern {
     this.staticRouter.set(router, callback)
   }
 
-  async getLayout(filePath, data) {
-    let template = await Promise.all([readFile(filePath), readFile(path.resolve(this.options.templatePath + '/layout.html'))])
+  getLayout(filePath, data) {
+    /* let template = await Promise.all([readFile(filePath), readFile(path.resolve(this.options.templatePath + '/layout.html'))])
 
     let body = this.render(template[0].toString(), data)
 
     data = Object.assign({ title: this.options.title + this.options.defaultTitle, seo: '', css: '', js: '', CDN: this.options.CDN }, data, {body})
     
-    return this.render(template[1].toString(), data)
-    /* 
-    let body = readFile(filePath)
+    return this.render(template[1].toString(), data) */
+    
+    let body = readFileSync(filePath)
     body = this.render(body.toString(), data)
 
     data = Object.assign({ title: this.options.title + this.options.defaultTitle, seo: '', css: '', js: '', CDN: this.options.CDN }, data, {body})
     
-    let layout = readFile(this.options.templatePath + '/layout.html')
+    let layout = readFileSync(this.options.templatePath + '/layout.html')
     return this.render(layout.toString(), data)
-    */
+   
 
     /* 
     let body = readFile(path.resolve(__dirname, filePath))
@@ -88,7 +87,7 @@ class Intern {
           
           if (template) {
             contentType = mimeType.getMime('.html')
-            template = await this.getLayout(this.options.templatePath + currentUrl + 'index.html', data)
+            template = this.getLayout(this.options.templatePath + currentUrl + 'index.html', data)
           }
         }
 
@@ -103,6 +102,7 @@ class Intern {
         });
         response.end(template)
       } catch (error) {
+        console.log(error)
         response.end('{status: -1, message: "Business Exception"}')
       }
 

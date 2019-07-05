@@ -26,7 +26,7 @@ gulp.task('nodemon', function nodemonCreate(done) {
     setTimeout(function () {
       bs.reload();
       done()
-    }, 1000);
+    }, 500);
   })
 })
 

@@ -1,8 +1,8 @@
-const Intern = require('./lib/intern')
+const Intern = require('./lib/intern/index')
 const intern = new Intern()
 
 intern.add('/', () => {
-  return {title: '首页', css: ['/css/index.css'], js: ['/js/index.js']}
+  return {title: '首页123', css: ['/css/index.css'], js: ['/js/index.js']}
 })
 
 intern.add('/list', () => {
