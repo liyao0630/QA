@@ -21,7 +21,6 @@ function printSql(sql) {
     console.log(sql)
   }
 }
-
 class DB {
   constructor(options) {
     this.options = {};
