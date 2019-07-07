@@ -1,8 +1,9 @@
 const http = require('http')
 const path = require('path')
-const ejs = require('ejs')
-const { readFile } = require('../utils')
+const fs = require('fs')
 const MimeType = require('../utils/mimeType')
+const Template = require('../template')
+const template = new Template()
 const mimeType = new MimeType()
 
 class Intern {
@@ -11,84 +12,59 @@ class Intern {
     let defaultOptions = {
       prot: 9530,
       host: 'localhost',
-      templatePath: '../../view/template/',
-      assetsPath: '../../../asstes/',
+      templatePath: path.resolve(__dirname, '../../view/template/'),
+      assetsPath: path.resolve(__dirname, '../../../asstes/'),
+      layoutPath: path.resolve(__dirname, '../../view/template/layout.html'),
       CDN: 'http://localhost:9530',
-      title: 'intern',
       defaultTitle: '-intern'
     }
     this.options = Object.assign({}, defaultOptions, options)
-    this.staticRouter = new Map()
+    this.getRouter = new Map()
+    this.layout = template.static(this.options.layoutPath).toString()
   }
 
-  render(template, data, options) {
-    return ejs.render(template, data, options)
-  }
-
-  add(router, callback) {
-    this.staticRouter.set(router, callback)
-  }
-
-  getLayout(filePath, data) {
-    let body = readFile(path.resolve(__dirname, filePath))
-    body = this.render(body.toString(), data)
-
-    data = Object.assign({ title: this.options.title + this.options.defaultTitle, seo: '', css: '', js: '', CDN: this.options.CDN }, data, {body})
-    
-    let layout = readFile(path.resolve(__dirname, this.options.templatePath + '../layout/index.html'))
-
-    /* let body = readFile(path.resolve(__dirname, filePath))
-    body = this.render(body.toString(), data)
-    data = Object.assign({ title: this.options.title + this.defaultOptions, seo: '', css: '', js: '' }, {body:path.resolve(__dirname, filePath)})
-    let layout = readFile(path.resolve(__dirname, this.options.templatePath + '../layout/index.html')) */
-    return this.render(layout.toString(), data)
-  }
-
-  getAssets(filePath) {
-    let template = readFile(path.resolve(__dirname, filePath))
-    if (template) {
-      return template
-    }
+  get(router, callback) {
+    this.getRouter.set(router, callback)
   }
 
   server() {
-    http.createServer((request, response) => {
+    http.createServer(async (request, response) => {
       try {
         let currentUrl = request.url
         let contentType = mimeType.getMime('.json')
         let extname = path.extname(currentUrl)
-        let template = ''
+        let filePath = this.options.assetsPath + currentUrl
+        let resulte = ''
         let statusCode = 200
 
-        if (extname) {
+        if (extname && fs.existsSync(filePath)) {
           contentType = mimeType.getMime(extname)
-          template = this.getAssets(this.options.assetsPath + currentUrl)
-        }
-
-        if (!template) {
+          resulte = template.static(filePath)
+        } else {
           let data = {}
-          if (this.staticRouter.has(currentUrl)) {
-            data = this.staticRouter.get(currentUrl)()
+
+          if (this.getRouter.has(currentUrl)) {
+            data = await this.getRouter.get(currentUrl)()
           }
 
-          template = this.getAssets(this.options.templatePath + currentUrl + 'index.html')
-          
-          if (template) {
+          filePath = this.options.templatePath + currentUrl + 'index.html'
+          if (fs.existsSync(filePath)) {
             contentType = mimeType.getMime('.html')
-            template = this.getLayout(this.options.templatePath + currentUrl + 'index.html', data)
+            resulte = template.show(filePath, data, this.layout)
           }
         }
 
-        if (!template) {
+        if (resulte) {
+          response.writeHead(statusCode, {
+            'charset': 'utf-8',
+            'Content-Type': contentType
+          });
+          response.end(resulte)
+        } else {
           statusCode = 404
-          template = ''
+          resulte = ''
         }
 
-        response.writeHead(statusCode, {
-          'charset': 'utf-8',
-          'Content-Type': contentType
-        });
-        response.end(template)
       } catch (error) {
         console.log(error)
         response.end('{status: -1, message: "Business Exception"}')
