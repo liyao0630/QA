@@ -4,17 +4,18 @@
   "main": "index.js",
   "license": "MIT",
   "scripts": {
-    "dev": "NODE_ENV=development gulp server",
-    "start": "node ./src "
+    "dev": "cross-env NODE_ENV=development gulp server",
+    "start": "node ./src NODE_ENV=development "
   },
   "dependencies": {
-    "autocannon": "^4.0.0",
     "ejs": "^2.6.2",
     "mysql": "^2.17.1",
+    "mysql2": "^1.6.5",
     "yaml": "^1.6.0"
   },
   "devDependencies": {
     "browser-sync": "^2.26.3",
+    "cross-env": "^5.2.0",
     "gulp": "^4.0.0",
     "gulp-nodemon": "^2.4.2"
   }

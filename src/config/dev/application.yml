@@ -12,6 +12,6 @@ web:
       name: local
       host: localhost
       user: roor
-      password: ''
+      password: '123123'
       database: test
       connectionLimit: 20

@@ -5,7 +5,9 @@ let db = {}
 let mysqlConfig =  utils.getConfig().web.mysql
 
 mysqlConfig.forEach(config => {
-  db[config.name] = new DB(config)
+  let name = config.name
+  delete config.name
+  db[name] = new DB(config)
 });
 
 module.exports = exports = db
