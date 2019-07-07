@@ -2,7 +2,7 @@ const utils = require('../utils')
 const DB = require('./db')
 
 let db = {}
-let mysqlConfig =  utils.getConfig().web.mysql
+let mysqlConfig = utils.getConfig().web.mysql
 
 mysqlConfig.forEach(config => {
   let name = config.name

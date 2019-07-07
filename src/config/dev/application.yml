@@ -1,9 +1,7 @@
 web:
   app:
-    assets: assets
     port: 3030
     host: localhost
-    viewDir: view
   cache:
     maxCacheSize: 104857600
     expire: 60000
@@ -11,7 +9,7 @@ web:
     -
       name: local
       host: localhost
-      user: roor
+      user: root
       password: '123123'
       database: test
       connectionLimit: 20

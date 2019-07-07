@@ -14,17 +14,23 @@ class Intern {
       host: 'localhost',
       templatePath: path.resolve(__dirname, '../../view/template/'),
       assetsPath: path.resolve(__dirname, '../../../asstes/'),
-      layoutPath: path.resolve(__dirname, '../../view/template/layout.html'),
-      CDN: 'http://localhost:9530',
-      defaultTitle: '-intern'
+      CDN: '',
+      commonTitle: '-intern'
     }
     this.options = Object.assign({}, defaultOptions, options)
     this.getRouter = new Map()
-    this.layout = template.static(this.options.layoutPath).toString()
   }
 
   get(router, callback) {
     this.getRouter.set(router, callback)
+  }
+
+  response(response, code, contentType, resulte) {
+    response.writeHead(code, {
+      'charset': 'utf-8',
+      'Content-Type': mimeType.getMime(extname)
+    });
+    response.end(resulte)
   }
 
   server() {
@@ -33,24 +39,19 @@ class Intern {
         let currentUrl = request.url
         let contentType = mimeType.getMime('.json')
         let extname = path.extname(currentUrl)
-        let filePath = this.options.assetsPath + currentUrl
         let resulte = ''
         let statusCode = 200
 
-        if (extname && fs.existsSync(filePath)) {
-          contentType = mimeType.getMime(extname)
-          resulte = template.static(filePath)
-        } else {
-          let data = {}
-
-          if (this.getRouter.has(currentUrl)) {
-            data = await this.getRouter.get(currentUrl)()
-          }
-
-          filePath = this.options.templatePath + currentUrl + 'index.html'
+        if (extname) {
+          let filePath = this.options.assetsPath + currentUrl
           if (fs.existsSync(filePath)) {
+            contentType = mimeType.getMime(extname)
+            resulte = template.static(filePath)
+          }
+        } else {
+          if (this.getRouter.has(currentUrl)) {
+            resulte = await this.getRouter.get(currentUrl)()
             contentType = mimeType.getMime('.html')
-            resulte = template.show(filePath, data, this.layout)
           }
         }
 
@@ -59,7 +60,7 @@ class Intern {
             'charset': 'utf-8',
             'Content-Type': contentType
           });
-          response.end(resulte)
+          response.end(resulte.toString())
         } else {
           statusCode = 404
           resulte = ''

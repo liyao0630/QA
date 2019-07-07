@@ -12,8 +12,7 @@ const defaultOptions = {
   charset: 'UTF8_GENERAL_CI',
   supportBigNumbers: true,
   bigNumberStrings: false,
-  dateStrings: false,
-  insecureAuth: true
+  dateStrings: false
 }
 
 function printSql(sql) {
@@ -36,14 +35,18 @@ class DB {
         this.options[k] = options[k];
       }
     }
+    this.connection = mysql.createConnection(this.options)
+    // this.createConnection()
   }
 
-  connect() {
-    return mysql.createConnection(this.options)
+  createConnection() {
+    this.connection = mysql.createConnection(this.options)
   }
+
   getConnect() {
-    return this.connect()
+    return this.connection
   }
+
   async query(sql) {
     printSql(sql)
     return new Promise((resolve, reject) => {
