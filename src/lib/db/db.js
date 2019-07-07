@@ -16,7 +16,6 @@ const defaultOptions = {
   insecureAuth: true
 }
 
-
 function printSql(sql) {
   if (process.env.NODE_ENV === 'development') {
     console.log(sql)
