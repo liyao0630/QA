@@ -44,7 +44,7 @@ class Intern {
           let data = {}
 
           if (this.getRouter.has(currentUrl)) {
-            data = this.getRouter.get(currentUrl)()
+            data = await this.getRouter.get(currentUrl)()
           }
 
           filePath = this.options.templatePath + currentUrl + 'index.html'

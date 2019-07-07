@@ -1,21 +1,14 @@
 const fs = require('fs')
-
+const path = require('path')
+const YAML = require('yaml')
 module.exports = exports = {
-  fileExists(path) {
-    return fs.existsSync(path)
+  isDevelopment() {
+    return process.env.NODE_ENV === 'development'
   },
-  readFileSync(path) {
-    return fs.readFileSync(path)
-  },
-  readFile(path) {
-    return new Promise((resolve, reject) => {
-      fs.readFile(path, (err, data) => {
-        if (err) {
-          reject(err)
-        } else {
-          resolve(data)
-        }
-      })
-    })
+  getConfig() {
+    let dev = this.isDevelopment() ? 'dev/' : ''
+    let configPath = '../../config/' + dev + 'application.yml'
+    let configStr = fs.readFileSync(path.resolve(__dirname, configPath), 'utf-8')
+    return YAML.parse(configStr)
   }
 }

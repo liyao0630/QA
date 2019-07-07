@@ -4,13 +4,12 @@
   "main": "index.js",
   "license": "MIT",
   "scripts": {
-    "start": "gulp server",
-    "dev": "node ./src "
+    "dev": "NODE_ENV=development gulp server",
+    "start": "NODE_ENV=development node ./src "
   },
   "dependencies": {
     "ejs": "^2.6.2",
-    "formidable": "^1.2.1",
-    "mongodb": "^3.1.12",
+    "mysql": "^2.17.1",
     "yaml": "^1.6.0"
   },
   "devDependencies": {
