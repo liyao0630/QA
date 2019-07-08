@@ -29,36 +29,32 @@ class DB {
     }
     this.master = !!options.master;
     this.options = Object.assign({}, defaultOptions, options);
+    console.log(this.options)
     for (let k in options) {
       if (typeof this.options[k] !== 'undefined') {
         this.options[k] = options[k];
       }
     }
-    this.pool =  null
-    this.createConnection(this.options)
-    // 
+    this.connection = mysql.createConnection(this.options)
+    // this.createConnection()
   }
 
   createConnection() {
-    this.pool = mysql.createPool(this.options);
+    this.connection = mysql.createConnection(this.options)
   }
 
   getConnect() {
-    return this.pool
+    return this.connection
   }
 
   async query(sql) {
     printSql(sql)
     return new Promise((resolve, reject) => {
-      this.pool.getConnection((err, connection) => {
-        if (err) throw err
-        connection.query(sql, (err, results, fields) => {
-          connection.release()
-          if (err) {
-            reject(err)
-          }
-          resolve(results)
-        })
+      this.getConnect().query(sql, (err, results, fields) => {
+        if (err) {
+          reject(err)
+        }
+        resolve(results)
       })
     })
   }
