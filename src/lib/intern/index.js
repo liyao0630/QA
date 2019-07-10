@@ -48,11 +48,11 @@ class Intern {
             contentType = mimeType.getMime(extname)
             resulte = template.static(filePath)
           }
-        } else {
-          if (this.getRouter.has(currentUrl)) {
-            resulte = await this.getRouter.get(currentUrl)()
-            contentType = mimeType.getMime('.html')
-          }
+        }
+        
+        if (this.getRouter.has(currentUrl)) {
+          resulte = await this.getRouter.get(currentUrl)()
+          contentType = mimeType.getMime('.html')
         }
 
         if (resulte) {
