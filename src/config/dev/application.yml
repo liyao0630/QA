@@ -2,6 +2,7 @@ web:
   app:
     port: 3030
     host: localhost
+    assets: assets
   cache:
     maxCacheSize: 104857600
     expire: 60000
