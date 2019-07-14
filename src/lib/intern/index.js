@@ -32,7 +32,6 @@ class Intern {
   }
 
   response(response, code, contentType, resulte) {
-    console.log(contentType, mimeType.getMime(contentType))
     response.writeHead(code, {
       'charset': 'utf-8',
       'Content-Type': mimeType.getMime(contentType)
