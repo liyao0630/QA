@@ -4,8 +4,10 @@ const fs = require('fs')
 const querystring = require('querystring');
 const MimeType = require('../utils/mimeType')
 const Template = require('../template')
+const response = require('../response')
 const template = new Template()
 const mimeType = new MimeType()
+console.log(response.isAssets)
 class Intern {
 
   constructor(options) {
@@ -31,69 +33,53 @@ class Intern {
     this.postRouter.set(router, callback)
   }
 
-  response(response, code, contentType, resulte) {
-    response.writeHead(code, {
+  response(res, code, contentType, resulte) {
+    console.log(resulte)
+    res.writeHead(code, {
       'charset': 'utf-8',
       'Content-Type': mimeType.getMime(contentType)
     });
-    response.end(resulte)
-  }
-
-  isAssets(url) {
-    return /\/assets\//.test(url)
-  }
-
-  readAssets(response, filePath) {
-    let contentType
-    let resulte = ''
-    let statusCode = 200
-    if (fs.existsSync(filePath)) {
-      contentType = path.extname(filePath).slice(1)
-      resulte = fs.existsSync(filePath) && fs.readFileSync(filePath)
-    } else {
-      statusCode = 404
-      contentType = 'html'
-    }
-    this.response(response, statusCode, contentType, resulte)
+    res.end(resulte)
   }
 
   server() {
-    http.createServer(async (request, response) => {
+    http.createServer((req, res) => {
       try {
-        let currentUrl = request.url
-        let method = request.method
+        let currentUrl = req.url
+        let method = req.method
         let contentType = ''
         let resulte = ''
         let statusCode = 200
         if (method === 'GET') {
-          if (this.isAssets(currentUrl)) {
-            return this.readAssets(response, this.options.assetsPath + currentUrl)
+
+          if (response.isAssets(currentUrl)) {
+            return response.readAssets(res, this.options.assetsPath + currentUrl)
           }
 
           if (this.getRouter.has(currentUrl)) {
-            let data = await this.getRouter.get(currentUrl)()
-            contentType = resulte.type || 'html'
-            resulte = template.show(currentUrl + '/index.html', data)
-            return this.response(response, statusCode, contentType, resulte)
+            this.getRouter.get(currentUrl)(req, res)
           }
         }
 
         if (method === "POST") {
           if (this.postRouter.has(currentUrl)) {
             let body = ''
-            request.on('data', (chunk) => {
+            req.on('data', (chunk) => {
               body += chunk
             })
-            request.on('end', async () => {
+            req.on('end', async () => {
               let resulte = await this.postRouter.get(currentUrl)(querystring.parse(body))
-              contentType = resulte.type || 'html'
-              return this.response(response, statusCode, contentType, JSON.stringify(resulte))
+              contentType = resulte.type || 'json'
+              if (contentType === 'json') {
+                resulte = JSON.stringify(resulte)
+              }
+              return this.response(res, statusCode, contentType, resulte)
             })
           }
         }
       } catch (error) {
         console.log(error)
-        response.end('{status: -1, message: "Business Exception"}')
+        res.end('{status: -1, message: "Business Exception"}')
       }
 
     }).listen(this.options.prot, this.options.host)

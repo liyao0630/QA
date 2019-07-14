@@ -36,7 +36,6 @@ class DB {
     }
     this.pool =  null
     this.createConnection(this.options)
-    // 
   }
 
   createConnection() {

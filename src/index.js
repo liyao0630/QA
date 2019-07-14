@@ -1,13 +1,13 @@
 const Intern = require('./lib/intern')
+const response = require('./lib/response')
 const Template = require('./lib/template')
 const template = new Template()
 const db = require('./lib/db')
 const intern = new Intern()
-intern.get('/', async () => {
-  return await db.local.query('select * from user').then((data) => {
-    console.log(data)
-    // return { title: '首页', css: ['/css/index.css'], js: ['/js/index.js'], list:  data} 
-    return { title: '首页', css: ['/assets/css/index.css'], js: ['/assets/js/index.js'], list: data }
+intern.get('/', (res, req) => {
+  db.local.query('select * from user').then((data) => {
+    let resulte = template.show('/index.html', { title: '首页', css: ['/assets/css/index.css'], js: ['/assets/js/index.js'], list: data })
+    response.end(req, 200, 'html', JSON.stringify(resulte))
   })
 })
 
