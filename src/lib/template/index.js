@@ -7,10 +7,6 @@ module.exports = exports = class Template {
     this.templatePath = path.resolve(__dirname, '../../view/template/'),
     this.layoutTemplate = fs.readFileSync(path.resolve(__dirname, '../../view/template/layout.html'), 'utf-8')
   }
-
-  static isAssets(url) {
-    return /\/assets\//.test(url)
-  }
   
   show(filePath, data, layout = true) {
     filePath = this.templatePath + filePath
@@ -19,7 +15,7 @@ module.exports = exports = class Template {
       body = this.render(body, data)
       if (layout) {
         data = Object.assign({ title: '', seo: '', css: '', js: '', CDN: '' }, data, { body })
-        return this.render(this.layoutTemplate, data)
+        return ejs.render(this.layoutTemplate, data)
       } else {
         return body
       }

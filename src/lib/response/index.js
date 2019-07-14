@@ -4,10 +4,6 @@ const content_types = require('./content_types')
 
 class Response {
 
-  static isAssets(url) {
-    return /\/assets\//.test(url)
-  }
-
   static readAssets(response, filePath) {
     let contentType = 'html'
     let statusCode = 404
@@ -17,23 +13,15 @@ class Response {
       contentType = path.extname(filePath).slice(1)
       resulte = fs.existsSync(filePath) && fs.readFileSync(filePath)
     }
-    this.end(response, statusCode, contentType, resulte)
+    this.end(response, resulte, contentType, statusCode)
   }
 
-  static contentType(request) {
-    console.log(request.accept)
-  }
-
-  static setHeader(response, name, value) {
-    response.setHeader(name, value)
-  }
-
-  static end(res, code, contentType, resulte) {
-    res.writeHead(code, {
+  static end(response, resulte, contentType = 'html', statusCode = 200) {
+    response.writeHead(statusCode, {
       'charset': 'utf-8',
       'Content-Type': content_types[contentType]
     });
-    res.end(resulte)
+    response.end(resulte)
   }
 }
 

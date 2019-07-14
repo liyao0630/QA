@@ -1,13 +1,7 @@
 const http = require('http')
 const path = require('path')
 const fs = require('fs')
-const querystring = require('querystring');
-const MimeType = require('../utils/mimeType')
-const Template = require('../template')
 const response = require('../response')
-const template = new Template()
-const mimeType = new MimeType()
-console.log(response.isAssets)
 class Intern {
 
   constructor(options) {
@@ -25,6 +19,10 @@ class Intern {
     this.postRouter = new Map()
   }
 
+  isAssets(url) {
+    return /\/assets\//.test(url)
+  }
+
   get(router, callback) {
     this.getRouter.set(router, callback)
   }
@@ -33,50 +31,32 @@ class Intern {
     this.postRouter.set(router, callback)
   }
 
-  response(res, code, contentType, resulte) {
-    console.log(resulte)
-    res.writeHead(code, {
-      'charset': 'utf-8',
-      'Content-Type': mimeType.getMime(contentType)
-    });
-    res.end(resulte)
-  }
-
   server() {
     http.createServer((req, res) => {
       try {
         let currentUrl = req.url
         let method = req.method
-        let contentType = ''
-        let resulte = ''
-        let statusCode = 200
         if (method === 'GET') {
-
-          if (response.isAssets(currentUrl)) {
-            return response.readAssets(res, this.options.assetsPath + currentUrl)
-          }
-
           if (this.getRouter.has(currentUrl)) {
-            this.getRouter.get(currentUrl)(req, res)
+            return this.getRouter.get(currentUrl)(req, res)
           }
         }
 
         if (method === "POST") {
           if (this.postRouter.has(currentUrl)) {
-            let body = ''
-            req.on('data', (chunk) => {
-              body += chunk
-            })
-            req.on('end', async () => {
-              let resulte = await this.postRouter.get(currentUrl)(querystring.parse(body))
-              contentType = resulte.type || 'json'
-              if (contentType === 'json') {
-                resulte = JSON.stringify(resulte)
-              }
-              return this.response(res, statusCode, contentType, resulte)
-            })
+            return this.postRouter.get(currentUrl)(req, res)
           }
         }
+
+        if (this.isAssets(currentUrl)) {
+          return response.readAssets(res, this.options.assetsPath + currentUrl)
+        }
+
+        res.writeHead(404, {
+          'charset': 'utf-8',
+          'Content-Type': 'text/html'
+        });
+        res.end('')
       } catch (error) {
         console.log(error)
         res.end('{status: -1, message: "Business Exception"}')
