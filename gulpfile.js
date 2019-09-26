@@ -1,6 +1,8 @@
 const gulp = require('gulp'),
   nodemon = require('gulp-nodemon'),
-  bs = require('browser-sync').create();
+  bs = require('browser-sync').create()
+  proxy = require('http-proxy-middleware')
+;
 
 /**
  * Run nodemon.
